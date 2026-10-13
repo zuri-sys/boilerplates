@@ -1,0 +1,10 @@
+{
+  "name": "stockroom-boilerplate",
+  "private": true,
+  "scripts": {
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev:backend": "php backend/artisan serve --host=127.0.0.1 --port=8017",
+    "build": "npm --prefix frontend run build",
+    "test": "php backend/artisan test"
+  }
+}
