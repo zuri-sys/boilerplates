@@ -46,9 +46,7 @@ export async function api(path, { method = "GET", body, signal } = {}) {
       saveSession(null);
       window.dispatchEvent(new Event("helpdesk:unauthorized"));
     }
-    const error = new Error(
-      data.message || "The request could not be completed.",
-    );
+    const error = new Error(data.message || "The request could not be completed.");
     error.fields = data.errors || {};
     error.status = response.status;
     throw error;
