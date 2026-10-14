@@ -1,10 +1,4 @@
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import {
   BrowserRouter,
   Link,
@@ -62,8 +56,7 @@ function AuthProvider({ children }) {
       setMessage("Your session expired. Please sign in again.");
     };
     window.addEventListener("helpdesk:unauthorized", unauthorized);
-    return () =>
-      window.removeEventListener("helpdesk:unauthorized", unauthorized);
+    return () => window.removeEventListener("helpdesk:unauthorized", unauthorized);
   }, []);
   useEffect(() => {
     if (!session) return;
@@ -131,10 +124,7 @@ function Login() {
     event.preventDefault();
     setError("");
     const credentials = Object.fromEntries(new FormData(event.currentTarget));
-    if (
-      credentials.username !== "itadmin" ||
-      credentials.password !== "helpdesk123"
-    ) {
+    if (credentials.username !== "itadmin" || credentials.password !== "helpdesk123") {
       setError("Incorrect username or password. Please try again.");
       return;
     }
@@ -153,14 +143,15 @@ function Login() {
       <section className="login-story">
         <Brand />
         <div className="story-content">
-          <span className="eyebrow">YOUR IT OPERATIONS, CONNECTED</span>
+          <span className="eyebrow">IT SERVICE MANAGEMENT</span>
           <h1>
-            A clearer view.
-            <br />A faster resolution.
+            IT support, organized.
+            <br />
+            From request to resolution.
           </h1>
           <p>
-            One workspace to manage requests, keep your team moving, and make IT
-            support feel effortless.
+            One workspace to manage requests, keep your team moving, and make IT support feel
+            effortless.
           </p>
           <div className="story-illustration" aria-hidden="true">
             <div className="illustration-orbit" />
@@ -169,7 +160,7 @@ function Login() {
                 <Ticket size={26} />
               </span>
               <div>
-                <strong>Every request, in the right place.</strong>
+                <strong>Centralized service requests</strong>
                 <span>From first contact to resolution</span>
               </div>
               <Check size={20} />
@@ -200,7 +191,7 @@ function Login() {
           </span>
           <span className="eyebrow">WELCOME BACK</span>
           <h2>Sign in to your workspace</h2>
-          <p>Good support starts here. Let’s get you signed in.</p>
+          <p>Enter your credentials to access the IT helpdesk.</p>
           <ErrorMessage>{error || message}</ErrorMessage>
           <label htmlFor="username">Username</label>
           <input
@@ -239,14 +230,11 @@ function Login() {
             <div>
               <strong>Laboratory workspace</strong>
               <span>
-                Username: <code>itadmin</code> · Password:{" "}
-                <code>helpdesk123</code>
+                Username: <code>itadmin</code> · Password: <code>helpdesk123</code>
               </span>
             </div>
           </div>
-          <div className="login-footer">
-            A little more organized. A lot more resolved.
-          </div>
+          <div className="login-footer">IT System Management and Helpdesk</div>
         </form>
       </section>
     </div>
@@ -296,11 +284,11 @@ function ProtectedLayout() {
         <div className="sidebar-bottom">
           <div className="support-card">
             <LifeBuoy size={24} />
-            <strong>A little more resolved.</strong>
+            <strong>Service operations</strong>
             <p>
-              Keep every request on track,
+              Track requests and priorities,
               <br />
-              from open to closed.
+              from submission to resolution.
             </p>
           </div>
           <div className="profile">
@@ -327,11 +315,7 @@ function ProtectedLayout() {
               <span /> IT support workspace
             </span>
             <span className="avatar small">IA</span>
-            <button
-              className="mobile-logout"
-              onClick={logout}
-              aria-label="Sign out"
-            >
+            <button className="mobile-logout" onClick={logout} aria-label="Sign out">
               <LogOut size={18} />
             </button>
           </div>
@@ -340,7 +324,7 @@ function ProtectedLayout() {
           <Outlet />
         </main>
         <footer className="page-footer">
-          <span>Supportdesk · IT operations made simple</span>
+          <span>Supportdesk · IT Service Management</span>
           <span>
             <ShieldCheck size={13} /> Helpdesk workspace
           </span>
@@ -393,8 +377,7 @@ function TicketList() {
   const [priority, setPriority] = useState("");
   const [notice, setNotice] = useState(location.state?.notice || "");
   useEffect(() => {
-    if (location.state?.notice)
-      navigate(location.pathname, { replace: true, state: null });
+    if (location.state?.notice) navigate(location.pathname, { replace: true, state: null });
   }, []);
   const tickets = data || [];
   const filtered = useMemo(
@@ -414,29 +397,28 @@ function TicketList() {
       label: "Total tickets",
       value: tickets.length,
       icon: Ticket,
-      caption: "Every request in one place",
+      caption: "All submitted service requests",
       tone: "green",
     },
     {
       label: "Open requests",
       value: tickets.filter((t) => t.status === "Open").length,
       icon: ClipboardList,
-      caption: "Ready for your attention",
+      caption: "Requests awaiting action",
       tone: "amber",
     },
     {
       label: "In progress",
       value: tickets.filter((t) => t.status === "In progress").length,
       icon: Clock3,
-      caption: "Moving toward a solution",
+      caption: "Requests currently being handled",
       tone: "blue",
     },
     {
       label: "Resolved",
-      value: tickets.filter((t) => ["Resolved", "Closed"].includes(t.status))
-        .length,
+      value: tickets.filter((t) => ["Resolved", "Closed"].includes(t.status)).length,
       icon: ShieldCheck,
-      caption: "One less thing to worry about",
+      caption: "Resolved and closed requests",
       tone: "green",
     },
   ];
@@ -444,13 +426,11 @@ function TicketList() {
     <>
       <div className="page-heading">
         <div>
-          <span className="eyebrow">YOUR SUPPORT WORKSPACE</span>
+          <span className="eyebrow">SERVICE OPERATIONS</span>
           <h1>
             Helpdesk tickets<span className="heading-dot">.</span>
           </h1>
-          <p>
-            A little clarity for every request. Keep your IT support moving.
-          </p>
+          <p>Manage support requests, monitor priorities, and track service resolution.</p>
         </div>
         <Link className="button primary" to="/tickets/new">
           <Plus size={17} /> Add ticket
@@ -460,10 +440,7 @@ function TicketList() {
         <div className="success-message" role="status">
           <Check size={17} />
           {notice}
-          <button
-            onClick={() => setNotice("")}
-            aria-label="Dismiss notification"
-          >
+          <button onClick={() => setNotice("")} aria-label="Dismiss notification">
             ×
           </button>
         </div>
@@ -477,9 +454,7 @@ function TicketList() {
                 <Icon size={19} />
               </span>
             </div>
-            <strong>
-              {loading || error ? "—" : value.toString().padStart(2, "0")}
-            </strong>
+            <strong>{loading || error ? "—" : value.toString().padStart(2, "0")}</strong>
             <span className="metric-caption">{caption}</span>
           </div>
         ))}
@@ -488,12 +463,10 @@ function TicketList() {
         <div className="panel-heading">
           <div>
             <h2>
-              Your ticket queue{" "}
-              <span className="count">
-                {loading || error ? "—" : tickets.length}
-              </span>
+              Service request queue{" "}
+              <span className="count">{loading || error ? "—" : tickets.length}</span>
             </h2>
-            <p>All the details. Nothing lost in the shuffle.</p>
+            <p>Review, prioritize, and manage your support tickets.</p>
           </div>
           <button
             className="icon-button"
@@ -506,17 +479,15 @@ function TicketList() {
         </div>
         <div className="table-toolbar">
           <div className="tabs" aria-label="Filter by status">
-            {["All tickets", "Open", "In progress", "Resolved", "Closed"].map(
-              (value) => (
-                <button
-                  key={value}
-                  className={tab === value ? "selected" : ""}
-                  onClick={() => setTab(value)}
-                >
-                  {value}
-                </button>
-              ),
-            )}
+            {["All tickets", "Open", "In progress", "Resolved", "Closed"].map((value) => (
+              <button
+                key={value}
+                className={tab === value ? "selected" : ""}
+                onClick={() => setTab(value)}
+              >
+                {value}
+              </button>
+            ))}
           </div>
           <div className="table-filters">
             <div className="search-input">
@@ -549,11 +520,7 @@ function TicketList() {
             <span className="empty-icon">
               <Ticket size={30} />
             </span>
-            <h3>
-              {tickets.length
-                ? "No matching tickets"
-                : "A clear queue. A fresh start."}
-            </h3>
+            <h3>{tickets.length ? "No matching tickets" : "No tickets yet"}</h3>
             <p>
               {tickets.length
                 ? "Try a different search, status, or priority."
@@ -595,13 +562,8 @@ function TicketList() {
                 {filtered.map((ticket) => (
                   <tr key={ticket.id}>
                     <td>
-                      <Link
-                        className="ticket-link"
-                        to={`/tickets/${ticket.id}`}
-                      >
-                        <span className="ticket-number">
-                          {ticket.ticket_number}
-                        </span>
+                      <Link className="ticket-link" to={`/tickets/${ticket.id}`}>
+                        <span className="ticket-number">{ticket.ticket_number}</span>
                         <strong>{ticket.subject}</strong>
                         <small>{ticket.issue_category}</small>
                       </Link>
@@ -652,14 +614,12 @@ function TicketList() {
                 ? "Queue unavailable"
                 : `Showing ${filtered.length} of ${tickets.length} tickets`}
           </span>
-          <span>Good support starts with a clear view.</span>
+          <span>IT helpdesk service requests</span>
         </div>
       </section>
       <div className="queue-note">
         <LifeBuoy size={17} />
-        <span>
-          Every ticket is a chance to make someone’s day a little easier.
-        </span>
+        <span>Track each request from submission through resolution.</span>
       </div>
       <Link className="floating-add" to="/tickets/new" aria-label="Add ticket">
         <Plus size={26} />
@@ -670,9 +630,7 @@ function TicketList() {
 function TicketForm({ ticket = null }) {
   const [values, setValues] = useState(
     ticket
-      ? Object.fromEntries(
-          Object.keys(emptyTicket).map((key) => [key, ticket[key]]),
-        )
+      ? Object.fromEntries(Object.keys(emptyTicket).map((key) => [key, ticket[key]]))
       : { ...emptyTicket },
   );
   const [errors, setErrors] = useState({});
@@ -699,9 +657,7 @@ function TicketForm({ ticket = null }) {
       });
       navigate("/tickets", {
         state: {
-          notice: ticket
-            ? "Ticket updated successfully."
-            : "Ticket created successfully.",
+          notice: ticket ? "Ticket updated successfully." : "Ticket created successfully.",
         },
       });
     } catch (err) {
@@ -736,7 +692,9 @@ function TicketForm({ ticket = null }) {
       <div className={`field ${full ? "full" : ""}`}>
         <label htmlFor={name}>
           {label}
-          <span className="required">*</span>
+          <span className="required" aria-hidden="true">
+            *
+          </span>
         </label>
         {options ? (
           <select {...props}>
@@ -756,9 +714,7 @@ function TicketForm({ ticket = null }) {
           <input
             {...props}
             type={name === "requester_email" ? "email" : "text"}
-            maxLength={
-              name === "subject" ? 200 : name === "requester_name" ? 120 : 254
-            }
+            maxLength={name === "subject" ? 200 : name === "requester_name" ? 120 : 254}
             placeholder={
               {
                 requester_name: "e.g. Alex Santos",
@@ -778,17 +734,12 @@ function TicketForm({ ticket = null }) {
   }
   return (
     <>
-      <Link
-        className="back-link"
-        to={ticket ? `/tickets/${ticket.id}` : "/tickets"}
-      >
+      <Link className="back-link" to={ticket ? `/tickets/${ticket.id}` : "/tickets"}>
         <ArrowLeft size={16} /> Back to {ticket ? "ticket details" : "tickets"}
       </Link>
       <div className="page-heading">
         <div>
-          <span className="eyebrow">
-            {ticket ? ticket.ticket_number : "LET’S GET IT SORTED"}
-          </span>
+          <span className="eyebrow">{ticket ? ticket.ticket_number : "NEW SERVICE REQUEST"}</span>
           <h1>
             {ticket ? "Edit ticket" : "Create a ticket"}
             <span className="heading-dot">.</span>
@@ -796,7 +747,7 @@ function TicketForm({ ticket = null }) {
           <p>
             {ticket
               ? "Keep the details current and the resolution moving."
-              : "Tell us what’s happening. We’ll take it from here."}
+              : "Provide the requester information and a detailed description of the issue."}
           </p>
         </div>
       </div>
@@ -806,7 +757,7 @@ function TicketForm({ ticket = null }) {
             <span className="section-number">01</span>
             <div>
               <h2>Requester information</h2>
-              <p>Who needs a helping hand?</p>
+              <p>Contact details for the person requesting support.</p>
             </div>
           </div>
           <div className="form-grid">
@@ -817,7 +768,7 @@ function TicketForm({ ticket = null }) {
             <span className="section-number">02</span>
             <div>
               <h2>Issue details</h2>
-              <p>A little context goes a long way.</p>
+              <p>Categorize the request and describe the issue.</p>
             </div>
           </div>
           <div className="form-grid">
@@ -829,10 +780,7 @@ function TicketForm({ ticket = null }) {
           </div>
           <ErrorMessage>{error}</ErrorMessage>
           <div className="form-actions">
-            <Link
-              className="button secondary"
-              to={ticket ? `/tickets/${ticket.id}` : "/tickets"}
-            >
+            <Link className="button secondary" to={ticket ? `/tickets/${ticket.id}` : "/tickets"}>
               Cancel
             </Link>
             <button className="button primary" disabled={busy}>
@@ -845,30 +793,22 @@ function TicketForm({ ticket = null }) {
           <span className="tips-icon">
             <LifeBuoy size={25} />
           </span>
-          <h3>A good ticket goes a long way.</h3>
-          <p>
-            A few thoughtful details help your support team find a solution
-            faster.
-          </p>
+          <h3>Request guidelines</h3>
+          <p>A few thoughtful details help your support team find a solution faster.</p>
           <div>
             <strong>Keep the subject clear</strong>
             <p>Summarize the problem in a few words.</p>
           </div>
           <div>
             <strong>Include the essentials</strong>
-            <p>
-              Mention the device, error messages, and when the issue started.
-            </p>
+            <p>Mention the device, error messages, and when the issue started.</p>
           </div>
           <div>
             <strong>Choose the right priority</strong>
-            <p>
-              Critical means work is blocked across your team. Low is for issues
-              that can wait.
-            </p>
+            <p>Critical means work is blocked across your team. Low is for issues that can wait.</p>
           </div>
           <small>
-            <ShieldCheck size={14} /> Saved securely to your helpdesk database
+            <ShieldCheck size={14} /> All required fields are marked with an asterisk
           </small>
         </aside>
       </div>
@@ -947,9 +887,7 @@ function TicketDetails() {
                 <div>
                   <dt>Requester email</dt>
                   <dd>
-                    <a href={`mailto:${ticket.requester_email}`}>
-                      {ticket.requester_email}
-                    </a>
+                    <a href={`mailto:${ticket.requester_email}`}>{ticket.requester_email}</a>
                   </dd>
                 </div>
                 <div>
@@ -979,11 +917,8 @@ function TicketDetails() {
             <aside className="ticket-side">
               <div className="form-tips">
                 <Clock3 size={25} />
-                <h3>Keep things moving.</h3>
-                <p>
-                  Update the ticket as work progresses so everyone knows where
-                  things stand.
-                </p>
+                <h3>Resolution tracking</h3>
+                <p>Update the ticket as work progresses so everyone knows where things stand.</p>
                 <Link className="button secondary" to={`/tickets/${id}/edit`}>
                   Update status <ArrowUpRight size={16} />
                 </Link>
@@ -993,16 +928,10 @@ function TicketDetails() {
                 <p>This permanently removes the ticket from the database.</p>
                 {confirmDelete ? (
                   <>
-                    <p className="delete-question">
-                      Delete {ticket.ticket_number}?
-                    </p>
+                    <p className="delete-question">Delete {ticket.ticket_number}?</p>
                     <ErrorMessage>{deleteError}</ErrorMessage>
                     <div className="delete-actions">
-                      <button
-                        className="button danger"
-                        onClick={remove}
-                        disabled={deleting}
-                      >
+                      <button className="button danger" onClick={remove} disabled={deleting}>
                         {deleting ? "Deleting…" : "Delete ticket"}
                       </button>
                       <button
@@ -1015,10 +944,7 @@ function TicketDetails() {
                     </div>
                   </>
                 ) : (
-                  <button
-                    className="delete-link"
-                    onClick={() => setConfirmDelete(true)}
-                  >
+                  <button className="delete-link" onClick={() => setConfirmDelete(true)}>
                     <Trash2 size={15} /> Delete ticket
                   </button>
                 )}
