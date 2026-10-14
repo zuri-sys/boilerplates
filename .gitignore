@@ -9,3 +9,5 @@ frontend/.env.local
 *.sqlite-*
 .DS_Store
 Thumbs.db
+.tools/
+artifacts/
