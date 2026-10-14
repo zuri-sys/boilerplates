@@ -1,0 +1,7 @@
+{
+  "framework": "vite",
+  "installCommand": "npm --prefix frontend ci",
+  "buildCommand": "npm run build",
+  "outputDirectory": "frontend/dist",
+  "rewrites": [{ "source": "/((?!assets/).*)", "destination": "/index.html" }]
+}
