@@ -45,6 +45,18 @@ Keep an existing environment file and application key when restarting.
 
 ## Vercel frontend
 
+The supplied Vercel branch URL is `https://boilerplates-git-main-jyzd.vercel.app`.
+The supplied Render service is `srv-db7dnm2vcj2c73d8tr80`, with API base URL
+`https://boilerplates-y4tf.onrender.com/api`. The production frontend build includes
+this public API endpoint through `frontend/.env.production`; Vercel environment
+variables can override it. If `VITE_API_BASE_URL` already exists in Vercel, set it
+to this same API URL or remove the old override before redeploying.
+
+Public live verification is pending: the supplied Vercel branch URL redirected
+to Vercel authentication, and the Render service timed out during health checks.
+Use the public production domain for submission. Vercel deployment protection
+can be reviewed under Settings > Deployment Protection.
+
 The frontend is deployed separately from Laravel. For a Vercel project using **Root Directory: frontend**:
 
 | Setting | Value |
@@ -53,7 +65,7 @@ The frontend is deployed separately from Laravel. For a Vercel project using **R
 | Install Command | `npm ci --include=dev` |
 | Build Command | `npm run build` |
 | Output Directory | `dist` |
-| Environment Variable | `VITE_API_BASE_URL=https://YOUR-RENDER-API.onrender.com/api` |
+| Environment Variable | `VITE_API_BASE_URL=https://boilerplates-y4tf.onrender.com/api` |
 
 `frontend/vercel.json` supplies these build settings and SPA route rewrites. If Vercel uses the repository root instead, the root `vercel.json` installs/builds the frontend and publishes `frontend/dist`.
 
@@ -75,13 +87,13 @@ If creating a web service manually:
 
 Do not use Node, Yarn, or an npm build command for the Laravel service. The Dockerfile installs PHP and Composer dependencies. Its startup command runs migrations and starts Apache.
 
-Set these API environment variables. The Blueprint supplies everything except your key and Vercel origin:
+The Blueprint supplies the known Vercel origins and database connection. You still need to provide the application key. For a manually created Render service, set these API environment variables:
 
 ```dotenv
 APP_ENV=production
 APP_DEBUG=false
 APP_KEY=YOUR_GENERATED_LARAVEL_KEY
-FRONTEND_URL=https://YOUR-FRONTEND.vercel.app
+FRONTEND_URL=https://boilerplates-git-main-jyzd.vercel.app,https://boilerplates-bz6qh28ay-jyzd.vercel.app
 DB_CONNECTION=pgsql
 DB_URL=YOUR_RENDER_POSTGRES_INTERNAL_CONNECTION_STRING
 DB_SSLMODE=require
