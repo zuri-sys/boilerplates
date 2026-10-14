@@ -5,6 +5,7 @@ frontend/.env.local
 .env
 .env.*
 !.env.example
+!frontend/.env.production
 *.sqlite
 *.sqlite-*
 .DS_Store
