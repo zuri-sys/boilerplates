@@ -14,7 +14,7 @@ services:
       - key: APP_KEY
         sync: false
       - key: FRONTEND_URL
-        sync: false
+        value: https://boilerplates-git-main-jyzd.vercel.app,https://boilerplates-bz6qh28ay-jyzd.vercel.app
       - key: DB_CONNECTION
         value: pgsql
       - key: DB_URL
