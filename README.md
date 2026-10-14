@@ -1,92 +1,143 @@
 # Supportdesk — CCS112 IT Helpdesk
 
-React 19 + Vite + React Router frontend and a separate Laravel 13 REST API. This implements the laboratory task in the provided image.
+React 19 + Vite + React Router frontend with a separate Laravel 13 REST API. Tickets use SQLite locally and managed PostgreSQL on Render.
 
-## Start locally
+## Current verification
 
-Use PHP **8.4+** (the locked development packages require it), Composer, and Node.js 22.12+. On this workstation a portable PHP 8.4 runtime is installed in the ignored `.tools/php84` directory; `run-php.mjs` selects it automatically without changing XAMPP.
+- Production frontend build passes.
+- All 6 Laravel tests pass, with 55 assertions covering authentication, CRUD, validation, API identification, and CORS.
+- Browser checks pass for protected routes, invalid/valid login, required fields, create, details, edit status, search, filters, inline deletion, mobile layout, and logout.
+- A created ticket remained available after both local servers were fully stopped and restarted.
+- Live backend deployment and cloud redeployment verification are still pending.
 
-From this repository directory:
+## Run locally
+
+Dependencies are already installed on this workstation. From the repository directory, start two terminals:
+
+```powershell
+npm run dev:backend
+```
+
+```powershell
+npm run dev:frontend
+```
+
+Open **http://127.0.0.1:5173**. Login: **itadmin / helpdesk123**.
+
+The backend runs on port 8017. Vite proxies `/api` to that server. `run-php.mjs` automatically uses the portable PHP 8.4 runtime in the ignored `.tools/php84` folder on this workstation. Elsewhere install PHP 8.4+ and Composer, or set `PHP_BINARY` to your runtime.
+
+For a fresh clone, use Node.js 22.12+ and PHP 8.4+:
 
 ```powershell
 cd backend
 composer install
-# Keep an existing .env; copy only on first setup.
 if (!(Test-Path .env)) { Copy-Item .env.example .env }
 cd ..
 node run-php.mjs artisan key:generate
 if (!(Test-Path backend/database/database.sqlite)) { New-Item backend/database/database.sqlite -ItemType File }
 node run-php.mjs artisan migrate
-npm --prefix frontend ci
+npm --prefix frontend ci --include=dev
 ```
 
-If Composer uses PHP 8.2 on this workstation, run `.tools/php84/php.exe C:/composer/composer.phar install` from the repository root with `--working-dir=backend`. Elsewhere use your PHP 8.4+ installation.
+On this workstation, Composer can use the portable runtime explicitly:
+`.tools/php84/php.exe C:/composer/composer.phar install --working-dir=backend`.
+Keep an existing environment file and application key when restarting.
 
-Start these in two separate terminals:
+## Vercel frontend
 
-```powershell
-npm run dev:backend
-npm run dev:frontend
+The frontend is deployed separately from Laravel. For a Vercel project using **Root Directory: frontend**:
+
+| Setting | Value |
+| --- | --- |
+| Framework | Vite |
+| Install Command | `npm ci --include=dev` |
+| Build Command | `npm run build` |
+| Output Directory | `dist` |
+| Environment Variable | `VITE_API_BASE_URL=https://YOUR-RENDER-API.onrender.com/api` |
+
+`frontend/vercel.json` supplies these build settings and SPA route rewrites. If Vercel uses the repository root instead, the root `vercel.json` installs/builds the frontend and publishes `frontend/dist`.
+
+The `--include=dev` option installs Vite and other build tools even when a production environment would otherwise omit development dependencies. After adding or changing `VITE_API_BASE_URL`, redeploy the frontend. Without a deployed Laravel API and that variable, the hosted site cannot sign in or save tickets.
+
+## Render Laravel API
+
+The root `render.yaml` now creates only the Laravel API and PostgreSQL database, since the frontend is on Vercel. Connect [zuri-sys/boilerplates](https://github.com/zuri-sys/boilerplates) through [Render Blueprints](https://dashboard.render.com/select-repo?type=blueprint) and use that file.
+
+If creating a web service manually:
+
+| Setting | Value |
+| --- | --- |
+| Runtime / Language | Docker |
+| Root Directory | `backend` |
+| Dockerfile Path | `./Dockerfile` |
+| Docker Command | Leave blank to use the Dockerfile; optional override: `sh render-start.sh` |
+| Health Check Path | `/up` |
+
+Do not use Node, Yarn, or an npm build command for the Laravel service. The Dockerfile installs PHP and Composer dependencies. Its startup command runs migrations and starts Apache.
+
+Set these API environment variables. The Blueprint supplies everything except your key and Vercel origin:
+
+```dotenv
+APP_ENV=production
+APP_DEBUG=false
+APP_KEY=YOUR_GENERATED_LARAVEL_KEY
+FRONTEND_URL=https://YOUR-FRONTEND.vercel.app
+DB_CONNECTION=pgsql
+DB_URL=YOUR_RENDER_POSTGRES_INTERNAL_CONNECTION_STRING
+DB_SSLMODE=require
+PORT=80
+LOG_CHANNEL=stderr
+CACHE_STORE=file
+SESSION_DRIVER=file
+QUEUE_CONNECTION=sync
 ```
 
-Open **http://127.0.0.1:5173** and log in with **itadmin / helpdesk123**. The frontend proxies `/api` to Laravel at port 8017. Override the runtime with `PHP_BINARY` if needed.
+Generate a valid key with `node run-php.mjs artisan key:generate --show`, then enter it in Render. Keep the same key across deployments. `FRONTEND_URL` must match the exact Vercel origin without a trailing slash. Multiple allowed origins can be comma-separated.
 
-## Task coverage
+The Blueprint injects `DB_URL` from the separate managed database. Migrations preserve existing data; startup never resets or seeds the database. See [Render Blueprint reference](https://render.com/docs/blueprint-spec) for configuration and [free service limits](https://render.com/docs/free) for database lifetime limits.
 
-- The default page is login. All remaining React routes require a session; logout and expired API tokens return to login. Invalid credentials show an inline message.
-- React Router provides `/tickets`, `/tickets/new`, `/tickets/:id`, and `/tickets/:id/edit`. A circular button at the bottom right of the list opens Add Ticket.
-- Ticket creation requires requester name/email, issue category, priority, subject, and description. Errors appear beside fields. Successful POST/PUT returns to the list without refreshing the browser.
-- The queue fetches Laravel records on mount, supports inline loading/errors and retry, and displays ticket number, requester, subject, priority, status, and creation date. Search and filters are available.
-- Details show all ticket fields and Back/Edit actions. Editing updates status and details. Deletion uses an inline confirmation and an HTTP DELETE request.
-- Eloquent records persist in SQLite locally and PostgreSQL on Render. Ticket numbers derive from database IDs, avoiding collisions between concurrent requests.
-- There is no local-storage fallback for ticket data. Frontend session storage contains only the temporary login token.
-- The API also verifies the laboratory credentials and protects ticket endpoints with an encrypted, expiring bearer token. These published credentials are for the required lab exercise; replace this authentication with real user accounts before using sensitive organizational data.
+Once deployed, verify `https://YOUR-RENDER-API.onrender.com/up`, set the frontend API variable, and redeploy Vercel. Create a ticket, redeploy both services, and confirm the same ticket remains in PostgreSQL.
 
-## API
+## API and application behavior
 
 | Method | Path | Purpose |
 | --- | --- | --- |
-| POST | /api/auth/login | Validate credentials and obtain an 8-hour token |
+| POST | /api/auth/login | Obtain an 8-hour token using laboratory credentials |
 | GET | /api/tickets | List tickets, newest first |
-| POST | /api/tickets | Create ticket with Open status |
+| POST | /api/tickets | Create a ticket with Open status |
 | GET | /api/tickets/{id} | Complete ticket details |
-| PUT | /api/tickets/{id} | Update ticket fields and status |
+| PUT | /api/tickets/{id} | Update fields and status |
 | DELETE | /api/tickets/{id} | Delete a ticket |
 
-Ticket requests send `Authorization: Bearer <token>` and `Accept: application/json`. Validation returns HTTP 422 with field errors; missing/expired tokens return 401; missing tickets return 404.
+Ticket requests use `Authorization: Bearer <token>` and `Accept: application/json`. Validation returns 422 with field errors; invalid/expired tokens return 401; missing tickets return 404.
 
-## Render deployment
+React routes: `/login`, `/tickets`, `/tickets/new`, `/tickets/:id`, and `/tickets/:id/edit`. All routes except login are protected. The list includes a fixed circular Add Ticket button. Validation, loading, server errors, and delete confirmation appear inline.
 
-The root `render.yaml` defines two independently deployed HTTPS services and a managed PostgreSQL database. The API builds `backend/Dockerfile`; the React static site builds `frontend/dist`. Startup runs non-destructive migrations, never database resets or seeding. React deep links rewrite to `index.html`.
+Tickets require requester name/email, category, priority, subject, and description. Ticket data is always stored through Laravel; there is no browser-storage fallback. Session storage holds only the temporary login token. The published credentials are required by the lab exercise; real organizational use needs individual user accounts.
 
-1. Push this repository to [zuri-sys/boilerplates](https://github.com/zuri-sys/boilerplates).
-2. In [Render Blueprints](https://dashboard.render.com/select-repo?type=blueprint), connect that repository and use `render.yaml`.
-3. Provide `APP_KEY`: generate it locally using `node run-php.mjs artisan key:generate --show` and enter the output in Render. Keep the same key across redeployments.
-4. Provide API `FRONTEND_URL` as the exact frontend HTTPS origin, without a trailing slash, such as `https://supportdesk-web.onrender.com`.
-5. Provide frontend `VITE_API_BASE_URL` as the actual API HTTPS URL **including /api**, such as `https://supportdesk-api.onrender.com/api`.
-6. Verify the assigned hostnames after Render creates the services; update those two URL variables if Render appends a suffix. Rebuild the frontend after changing its API URL.
-7. Sign in, create a ticket, and redeploy both services. The ticket should still be listed because `DB_URL` points to the separate managed PostgreSQL database.
+Unused inventory components, models, controllers, migration, seeding, tests, image, and backend Vite assets were removed. Core Laravel configuration and migrations remain.
 
-Blueprint URL variables require your actual service addresses; the examples above are not deployed URLs. The database connection is injected from Render, never committed. See [Render Blueprint reference](https://render.com/docs/blueprint-spec) for the configuration fields. The template selects free services; review [Render free service limits](https://render.com/docs/free) before deploying, particularly free PostgreSQL expiry. For lasting hosting, choose the database plan that suits your needs in Render.
-
-Live deployment and cloud persistence verification require access to your Render account. Preparing these files does not create hosted services.
-
-## Checks and submission evidence
+## Formatting and checks
 
 ```powershell
+npm --prefix frontend run format
+npm --prefix frontend run format:check
 npm run build
 npm test
 ```
 
-The Laravel ticket tests cover login rejection, unauthorized/tampered/expired tokens, create/list/details/update/delete, required fields, email validation, invalid categories/priorities/statuses, and subject length. Existing inventory tests remain regression coverage for the starter API.
+PHP follows Laravel Pint formatting. Frontend code uses the root Prettier configuration.
 
-For submission, collect:
+## Submission screenshots
 
-- React frontend HTTPS URL and Laravel API base URL.
-- Ticket list immediately after login.
-- Add Ticket screen with all fields filled before saving.
-- Details screen for that newly added ticket.
-- Ticket list after stopping and restarting both local servers.
-- Ticket list after redeploying both Render services, plus the matching row in Render PostgreSQL.
+Screenshots from the local browser verification are saved in the ignored `artifacts` directory:
 
-Browser verification screenshots from this workstation are saved in the ignored `artifacts` folder when available. Local restart evidence confirms local database persistence; the cloud redeploy evidence must be collected after the Render deployment.
+- `01-ticket-list-after-login.png`
+- `02-add-ticket-filled.png`
+- `03-ticket-details.png`
+- `04-mobile-ticket-list.png`
+- `05-mobile-login.png`
+- `06-login.png`
+- `07-ticket-list-after-restart.png`
+
+Submit the real Vercel frontend URL and Render API base URL. Also capture the ticket list after cloud redeployment and the matching PostgreSQL row once the backend is deployed. Local restart evidence verifies SQLite persistence; cloud persistence has not yet been tested.
